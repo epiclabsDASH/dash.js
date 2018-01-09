@@ -75,11 +75,11 @@ function X2JS(config) {
     }
 
     var DOMNodeTypes = {
-        ELEMENT_NODE 	   : 1,
-        TEXT_NODE    	   : 3,
+        ELEMENT_NODE        : 1,
+        TEXT_NODE           : 3,
         CDATA_SECTION_NODE : 4,
-        COMMENT_NODE	   : 8,
-        DOCUMENT_NODE 	   : 9
+        COMMENT_NODE       : 8,
+        DOCUMENT_NODE        : 9
     };
 
     function initRequiredPolyfills() {
@@ -299,7 +299,7 @@ function X2JS(config) {
                     result.__text = result.__text.join("\n");
                 }
                 //if(config.escapeMode)
-                //	result.__text = unescapeXmlChars(result.__text);
+                //    result.__text = unescapeXmlChars(result.__text);
                 if(config.stripWhitespaces)
                     result.__text = result.__text.trim();
                 delete result["#text"];
@@ -537,7 +537,7 @@ function X2JS(config) {
             var parsererrorNS = null;
             try {
                 xmlDoc = parser.parseFromString( xmlDocStr, "text/xml" );
-                if(xmlDoc.getElementsByTagNameNS("*", "parseerror").length > 0) {
+                if(xmlDoc.getElementsByTagNameNS("*", "parsererror").length > 0) {
                     xmlDoc = null;
                 }
             }
