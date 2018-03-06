@@ -62,6 +62,7 @@ function PlaybackController() {
         isDynamic,
         mediaPlayerModel,
         playOnceInitialized,
+        playbackStarted,
         lastLivePlaybackTime;
 
     function setup() {
@@ -73,6 +74,7 @@ function PlaybackController() {
         addAllListeners();
         isDynamic = streamInfo.manifestInfo.isDynamic;
         liveStartTime = streamInfo.start;
+        playbackStarted = false;
         eventBus.on(Events.DATA_UPDATE_COMPLETED, onDataUpdateCompleted, this);
         eventBus.on(Events.BYTES_APPENDED, onBytesAppended, this);
         eventBus.on(Events.BUFFER_LEVEL_STATE_CHANGED, onBufferLevelStateChanged, this);
@@ -205,6 +207,7 @@ function PlaybackController() {
         liveStartTime = NaN;
         wallclockTimeIntervalId = null;
         playOnceInitialized = false;
+        playbackStarted = false;
         commonEarliestTime = {};
         liveDelay = 0;
         bufferedRange = {};
@@ -378,10 +381,15 @@ function PlaybackController() {
         eventBus.trigger(Events.PLAYBACK_STARTED, {
             startTime: getTime()
         });
+        playbackStarted = true;
     }
 
     function onPlaybackPlaying() {
         log('Native video element event: playing');
+        if (!playbackStarted) {
+            log('Warning - Native video element event \'play\' was not received during playback starting process');
+            onPlaybackStart();
+        }
         eventBus.trigger(Events.PLAYBACK_PLAYING, {
             playingTime: getTime()
         });
