@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Test including dash.js into a WebPack project",
   "dependencies": {
-    "dashjs": "^2.6.4"
+    "dashjs": "git://github.com/epiclabsDASH/dash.js.git#fix_package"
   },
   "scripts": {
     "build": "node_modules/webpack/bin/webpack.js"
