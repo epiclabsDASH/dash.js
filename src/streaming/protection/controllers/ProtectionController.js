@@ -646,6 +646,7 @@ function ProtectionController(config) {
             LICENSE_SERVER_REQUEST_RETRIES, onLoad, onAbort, onError);
     }
 
+    // Implement license requests with a retry mechanism to avoid temporary network issues to affect playback experience
     function doLicenseRequest(url, headers, method, responseType, withCredentials, payload, retriesCount, onLoad, onAbort, onError) {
         const xhr = new XMLHttpRequest();
 
@@ -657,27 +658,35 @@ function ProtectionController(config) {
             xhr.setRequestHeader(key, headers[key]);
         }
 
+        const retryRequest = function () {
+            // fail silently and retry
+            retriesCount--;
+            setTimeout(function () {
+                doLicenseRequest(url, headers, method, responseType, withCredentials, payload,
+                    retriesCount, onLoad, onAbort, onError);
+            }, LICENSE_SERVER_REQUEST_RETRY_INTERVAL);
+        };
+
         xhr.onload = function () {
-            if (this.status === 200 || retriesCount === 0) {
+            if (this.status === 200 || retriesCount <= 0) {
                 onLoad(this);
-                return;
             } else {
-                // fail silently and retry
-                retriesCount--;
                 logger.warn('License request failed (' + this.status + '). Retrying it... Pending retries: ' + retriesCount);
-                setTimeout(function () {
-                    doLicenseRequest(url, headers, method, responseType, withCredentials, payload,
-                        retriesCount, onLoad, onAbort, onError);
-                }, LICENSE_SERVER_REQUEST_RETRY_INTERVAL);
+                retryRequest();
+            }
+        };
+
+        xhr.onerror = function () {
+            if (retriesCount <= 0) {
+                onError(this);
+            } else {
+                logger.warn('License request network request failed . Retrying it... Pending retries: ' + retriesCount);
+                retryRequest();
             }
         };
 
         xhr.onabort = function () {
             onAbort(this);
-        };
-
-        xhr.onerror = function () {
-            onError(this);
         };
 
         xhr.send(payload);
